@@ -28,7 +28,8 @@ public:
   string getMDR();
 
   string result = "";
-  void start();
+  void start(string inputOptions[]);
+  void lectura();
 
   void SET(string options[]);
   void ADD(string options[]);
