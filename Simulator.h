@@ -27,7 +27,7 @@ public:
   string getIDR();
   string getMDR();
 
-  string result = "gg";
+  string result = "";
   void start();
 
   void SET(string options[]);
@@ -38,8 +38,8 @@ public:
   void INC(string options[]);
   void DEC(string options[]);
   void MOV(string options[]);
-  void LDR(string options[]);
-  void STR(string options[]);
+  void LDR(string option);
+  void STR(string address, string value);
   void BEQ(string options[]);
   void AND(string options[]);
   void OR(string options[]);
