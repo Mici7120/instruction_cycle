@@ -72,16 +72,12 @@ string Simulator::getMDR()
 
 void Simulator::start(string inputOptions[])
 {
-  //cout << endl << "inputOptions: " << inputOptions[0] << inputOptions[1] << inputOptions[2] << inputOptions[3] << "|" << endl;
   string instrucction = inputOptions[0];
   string options[3] = {inputOptions[1], inputOptions[2], inputOptions[3]};
 
-  // cin >> instrucction >> options[0] >> options[1] >> options[2];
-  // cout << instrucction << options[0] << options[1] << options[2] << endl;
-
+  setUC(instrucction);
   if (instrucction == "END")
   {
-    //cout << "fin" << endl;
   }
   else if (instrucction == "SET")
   {
@@ -127,26 +123,16 @@ void Simulator::start(string inputOptions[])
   {
     BEQ(options);
   }
-  else if (instrucction == "AND")
-  {
-    AND(options);
-  }
-  else if (instrucction == "OR")
-  {
-    OR(options);
-  }
   else if (instrucction == "SHW") // SHOW
   {
     SHW(options);
   }
-  setUC(instrucction);
-  // cout << result << endl;
 }
 
 void Simulator::lectura()
 {
   ifstream archivo;
-  archivo.open("ENTRADA3.txt");
+  archivo.open("ENTRADA-DIV.txt");
   string aux;
 
   while (getline(archivo, aux))
@@ -155,15 +141,12 @@ void Simulator::lectura()
     string aux2;
     int i = 0;
     stringstream ststream(aux);
-    // cout << aux << endl;
     while (getline(ststream, aux2, ' '))
     {
-      // cout << i << " " << aux2 << " - ";
       options[i] = aux2;
       i++;
       if (i == 4)
       {
-        //cout << endl << options[0] << options[1] << options[2] << options[3] << "|" << endl;
         start(options);
         i = 0;
         break;
@@ -175,7 +158,6 @@ void Simulator::lectura()
 
 void Simulator::SET(string options[])
 { // SET - Guarda el valor en la direccion de memoria ingresada
-  // setACC(stoi(options[1]));
   STR(options[0], options[1]);
 }
 
@@ -191,7 +173,6 @@ void Simulator::ADD(string options[])
   {
     if (options[2] == "NULL") // D1 D2 NULL
     {                         // 2 parametros - carga los 2 valores de la memoria, los suma y lo guarda en el acumulador
-      // string ldrOptions[3] = {options[1], "NULL", "NULL"};
       string addOptions[3] = {options[0], "NULL", "NULL"};
       LDR(options[1]);
       ADD(addOptions);
@@ -200,7 +181,6 @@ void Simulator::ADD(string options[])
     {    // 3 parametros - carga los 2 valores de la memoria, los suma y lo guarda en la direccion de memoria
       string addOptions[3] = {options[0], options[1], "NULL"};
       ADD(addOptions);
-      // string strOptions[3] = {options[2], "NULL", "NULL"};
       STR(options[2], "ACC");
     }
   }
@@ -212,29 +192,27 @@ void Simulator::SUB(string options[])
   { // 1 parametro - carga el valor de la memoria y lo resta con el del acumulador
     int aux = getACC();
     LDR(options[0]);
-    setACC(getACC() - aux);
+    setACC(aux - getACC());
   }
   else
   {
     if (options[2] == "NULL")
     { // 2 parametros - carga los 2 valores de la memoria, los resta y lo guarda en el acumulador
-      // string ldrOptions[3] = {options[1], "NULL", "NULL"};
-      string subOptions[3] = {options[0], "NULL", "NULL"};
-      LDR(options[1]);
+      string subOptions[3] = {options[1], "NULL", "NULL"};
+      LDR(options[0]);
       SUB(subOptions);
     }
     else
     { // 3 parametros - carga los 2 valores de la memoria, los resta y lo guarda en la direccion de memoria
       string subOptions[3] = {options[0], options[1], "NULL"};
       SUB(subOptions);
-      // string strOptions[3] = {options[2], "NULL", "NULL"};
       STR(options[2], "ACC");
     }
   }
 }
 
 void Simulator::MUL(string options[])
-{ // MULTIPLICATION -
+{ // MULTIPLICATION
   if (options[1] == "NULL")
   {
     int aux = getACC();
@@ -249,7 +227,6 @@ void Simulator::MUL(string options[])
   {
     if (options[2] == "NULL")
     { // 2 parametros - carga los 2 valores de la memoria, los resta y lo guarda en el acumulador
-      // string ldrOptions[3] = {options[1], "NULL", "NULL"};
       string mulOptions[3] = {options[0], "NULL", "NULL"};
       LDR(options[1]);
       MUL(mulOptions);
@@ -258,32 +235,57 @@ void Simulator::MUL(string options[])
     { // 3 parametros - carga los 2 valores de la memoria, los resta y lo guarda en la direccion de memoria
       string mulOptions[3] = {options[0], options[1], "NULL"};
       MUL(mulOptions);
-      // string strOptions[3] = {options[2], "NULL", "NULL"};
       STR(options[2], "ACC");
     }
   }
 }
 
 void Simulator::DIV(string options[])
-{ // INTEGER DIVISION -
+{ // INTEGER DIVISION
+  if (options[1] == "NULL")
+  {
+    int cociente = 0;
+    int divisor = stoi(MDR_Read(options[0]));
+    while (getACC() >= divisor)
+    {
+      SUB(options);
+      cociente++;
+    }
+    setACC(cociente);
+  }
+  else
+  {
+    if (options[2] == "NULL")
+    { // 2 parametros - carga los 2 valores de la memoria, los divide y lo guarda el cociente en el acumulador
+      string divOptions[3] = {options[1], "NULL", "NULL"};
+      LDR(options[0]);
+      DIV(divOptions);
+    }
+    else
+    { // 3 parametros - carga los 2 valores de la memoria, los divide y lo guarda el cociente en la direccion de memoria
+      string divOptions[3] = {options[0], options[1], "NULL"};
+      DIV(divOptions);
+      STR(options[2], "ACC");
+    }
+  }
 }
 
 void Simulator::INC(string options[])
-{ // INCREMENT -
+{ // INCREMENT
   LDR(options[0]);
   setACC(getACC() + 1);
   STR(options[0], "ACC");
 }
 
 void Simulator::DEC(string options[])
-{ // DECREMENT -
+{ // DECREMENT
   LDR(options[0]);
   setACC(getACC() - 1);
   STR(options[0], "ACC");
 }
 
 void Simulator::MOV(string options[])
-{ // MOVE -
+{ // MOVE
   LDR(options[0]);
   STR(options[1], "ACC");
   STR(options[0], "");
@@ -328,14 +330,6 @@ void Simulator::STR(string address, string value)
 
 void Simulator::BEQ(string options[])
 { // EQUAL -
-}
-
-void Simulator::AND(string options[])
-{ // AND GATE -
-}
-
-void Simulator::OR(string options[])
-{ // OR GATE -
 }
 
 void Simulator::SHW(string options[])

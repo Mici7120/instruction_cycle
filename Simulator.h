@@ -42,8 +42,6 @@ public:
   void LDR(string option);
   void STR(string address, string value);
   void BEQ(string options[]);
-  void AND(string options[]);
-  void OR(string options[]);
   void SHW(string options[]);
 
   string MDR_Read(string adress);
