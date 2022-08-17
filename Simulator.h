@@ -14,22 +14,20 @@ public:
   Simulator();
   // setters and getters
   void setACC(int _ACC);
-  void setMAR(string _MAR);
   void setICR(string _ICR);
   void setUC(string _UC);
-  void setIDR(string _IDR);
+  void setMAR(string _MAR);
   void setMDR(string _MDR);
 
   int getACC();
-  string getMAR();
   string getICR();
   string getUC();
-  string getIDR();
+  string getMAR();
   string getMDR();
 
   string result = "";
-  void start(string inputOptions[]);
-  void lectura();
+  void start();
+  void execute(string inputOptions[]);
 
   void SET(string options[]);
   void ADD(string options[]);
@@ -41,10 +39,9 @@ public:
   void MOV(string options[]);
   void LDR(string option);
   void STR(string address, string value);
-  void BEQ(string options[]);
   void SHW(string options[]);
 
-  string MDR_Read(string adress);
+  void memoryOperation(string operation);
 
 private:
   int ACC;

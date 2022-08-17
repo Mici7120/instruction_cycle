@@ -10,6 +10,6 @@ using namespace std;
 int main()
 {
   Simulator sml;
-  sml.lectura();
+  sml.start();
   return 0;
 };

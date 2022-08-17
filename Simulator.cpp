@@ -9,6 +9,33 @@ Simulator::Simulator()
   }
 }
 
+void Simulator::start()
+{
+  ifstream archivo;
+  archivo.open("ENTRADA3.txt");
+  string aux;
+
+  while (getline(archivo, aux))
+  {
+    string options[4];
+    string aux2;
+    int i = 0;
+    stringstream ststream(aux);
+    while (getline(ststream, aux2, ' '))
+    {
+      options[i] = aux2;
+      i++;
+      if (i == 4)
+      {
+        execute(options);
+        i = 0;
+        break;
+      }
+    }
+  }
+  cout << result << endl;
+}
+
 // Setters and getters
 void Simulator::setACC(int _ACC)
 {
@@ -28,11 +55,6 @@ void Simulator::setICR(string _ICR)
 void Simulator::setUC(string _UC)
 {
   UC = _UC;
-}
-
-void Simulator::setIDR(string _IDR)
-{
-  IDR = _IDR;
 }
 
 void Simulator::setMDR(string _MDR)
@@ -60,21 +82,17 @@ string Simulator::getUC()
   return UC;
 }
 
-string Simulator::getIDR()
-{
-  return IDR;
-}
-
 string Simulator::getMDR()
 {
   return MDR;
 }
 
-void Simulator::start(string inputOptions[])
+void Simulator::execute(string inputOptions[])
 {
   string instrucction = inputOptions[0];
   string options[3] = {inputOptions[1], inputOptions[2], inputOptions[3]};
 
+  setICR(instrucction);
   setUC(instrucction);
   if (instrucction == "END")
   {
@@ -119,41 +137,10 @@ void Simulator::start(string inputOptions[])
   {
     STR(options[0], "ACC");
   }
-  else if (instrucction == "BEQ") // EQUAL
-  {
-    BEQ(options);
-  }
   else if (instrucction == "SHW") // SHOW
   {
     SHW(options);
   }
-}
-
-void Simulator::lectura()
-{
-  ifstream archivo;
-  archivo.open("ENTRADA-DIV.txt");
-  string aux;
-
-  while (getline(archivo, aux))
-  {
-    string options[4];
-    string aux2;
-    int i = 0;
-    stringstream ststream(aux);
-    while (getline(ststream, aux2, ' '))
-    {
-      options[i] = aux2;
-      i++;
-      if (i == 4)
-      {
-        start(options);
-        i = 0;
-        break;
-      }
-    }
-  }
-  cout << result << endl;
 }
 
 void Simulator::SET(string options[])
@@ -245,7 +232,9 @@ void Simulator::DIV(string options[])
   if (options[1] == "NULL")
   {
     int cociente = 0;
-    int divisor = stoi(MDR_Read(options[0]));
+    setMAR(options[0]);
+    memoryOperation("READ");
+    int divisor = stoi(getMDR());
     while (getACC() >= divisor)
     {
       SUB(options);
@@ -308,28 +297,16 @@ void Simulator::LDR(string option)
 }
 
 void Simulator::STR(string address, string value)
-{ // STORE - guarda lo del acumulador (ACC) en una direccion de memoria
+{ // STORE - guarda lo del acumulador (ACC) en una direccion de memoria o un determinado valor
   string storeValue = value;
   if (value == ("ACC"))
   {
     storeValue = to_string(getACC());
   }
-  int index;
-  for (int i = 0; i < sizeof(memory[0]); i++)
-  {
-    if (memory[0][i] == address)
-    {
-      index = i;
-      break;
-    }
-  }
-  setMAR(memory[0][index]);
+  
+  setMAR(address);
   setMDR(storeValue);
-  memory[1][index] = getMDR();
-}
-
-void Simulator::BEQ(string options[])
-{ // EQUAL -
+  memoryOperation("WRITE");
 }
 
 void Simulator::SHW(string options[])
@@ -356,29 +333,26 @@ void Simulator::SHW(string options[])
   }
   else
   {
-    int index;
-    for (int i = 0; i < sizeof(memory[0]); i++)
-    {
-      if (memory[0][i] == options[0])
-      {
-        index = i;
-        break;
-      }
-    }
-    result = memory[1][index];
+    setMAR(options[0]);
+    memoryOperation("READ");
+    result = getMDR();
   }
 }
 
-string Simulator::MDR_Read(string adress)
-{
+void Simulator::memoryOperation(string operation)
+{ //Lee la direccion almacenada en el MAR y lo guarda en el MDR
   int index;
   for (int i = 0; i < sizeof(memory[0]); i++)
   {
-    if (memory[0][i] == adress)
+    if (memory[0][i] == getMAR())
     {
       index = i;
       break;
     }
   }
-  return memory[1][index];
+  if(operation == "READ"){
+    setMDR(memory[1][index]);
+  }else{
+    memory[1][index] = getMDR();
+  }
 }
